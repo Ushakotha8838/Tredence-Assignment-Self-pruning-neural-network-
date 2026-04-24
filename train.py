@@ -38,7 +38,7 @@ def compute_sparsity_loss(model):
     return loss
 
 
-def plot_gates(model):   # ✅ MOVE HERE
+def plot_gates(model):   
     all_gates = []
     for module in model.modules():
         if hasattr(module, "gate_scores"):
@@ -99,4 +99,4 @@ def test():
 if __name__ == "__main__":
     train()
     test()
-    plot_gates(model)   # ✅ now works
+    plot_gates(model)  
