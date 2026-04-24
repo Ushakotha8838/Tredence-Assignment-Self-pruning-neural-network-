@@ -3,31 +3,25 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-
+import matplotlib.pyplot as plt
 from model import PrunableNetwork, get_sparsity
 
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 # Hyperparameters
 BATCH_SIZE = 128
 EPOCHS = 10
 LR = 1e-3
-LAMBDA = 1.0  # try 0.01, 1.0, 20.0
-
+LAMBDA = 1.0
 
 # Data
-transform = transforms.Compose([
-    transforms.ToTensor()
-])
+transform = transforms.Compose([transforms.ToTensor()])
 
 train_dataset = datasets.CIFAR10(root="./data", train=True, download=True, transform=transform)
 test_dataset = datasets.CIFAR10(root="./data", train=False, download=True, transform=transform)
 
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE)
-
 
 # Model
 model = PrunableNetwork().to(device)
@@ -44,11 +38,25 @@ def compute_sparsity_loss(model):
     return loss
 
 
+def plot_gates(model):   # ✅ MOVE HERE
+    all_gates = []
+    for module in model.modules():
+        if hasattr(module, "gate_scores"):
+            gates = torch.sigmoid(module.gate_scores).detach().cpu().numpy()
+            all_gates.extend(gates.flatten())
+
+    plt.hist(all_gates, bins=50)
+    plt.title("Gate Value Distribution")
+    plt.xlabel("Gate Value")
+    plt.ylabel("Frequency")
+    plt.savefig("gate_distribution.png")
+    plt.show()
+
+
 def train():
     model.train()
     for epoch in range(EPOCHS):
         total_loss = 0
-
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
 
@@ -91,3 +99,4 @@ def test():
 if __name__ == "__main__":
     train()
     test()
+    plot_gates(model)   # ✅ now works
