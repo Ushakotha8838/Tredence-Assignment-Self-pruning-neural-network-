@@ -24,3 +24,6 @@ Every connection in the network has a gate value between 0 and 1. During trainin
 ```bash
 pip install -r requirements.txt
 python train.py
+
+##  Gate Distribution
+![Gate Distribution](gate_distribution.png)
